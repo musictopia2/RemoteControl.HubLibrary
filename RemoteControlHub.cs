@@ -7,7 +7,9 @@ public class RemoteControlHub : Hub
         string group;
         bool rets = _hosts.TryRemove(Context.ConnectionId, out group!);
         if (rets)
+        {
             await Clients.OthersInGroup(group).SendAsync("HostDisconnected");
+        }
         await base.OnDisconnectedAsync(exception);
     }
     private static bool HasHost(string group)
@@ -35,14 +37,18 @@ public class RemoteControlHub : Hub
     public async Task ClientInvokeSimpleActionAsync(string group, string method)
     {
         if (HasHost(group) == false)
+        {
             await Clients.Caller.SendAsync("Failed");
+        }
         string connectionid = _hosts.Single(xx => xx.Value == group).Key;
         await Clients.Client(connectionid).SendAsync(method);
     }
     public async Task ClientInvokeComplexActionAsync(string group, string method, string payLoad) //since serializing does not work for this case.
     {
         if (HasHost(group) == false)
+        {
             await Clients.Caller.SendAsync("Failed");
+        }
         string connectionid = _hosts.Single(xx => xx.Value == group).Key;
         await Clients.Client(connectionid).SendAsync(method, payLoad);
     }
