@@ -30,8 +30,16 @@ public class RemoteControlHub : Hub
         }
         else
         {
-            string connectionid = _hosts.Single(xx => xx.Value == group).Key;
-            await Clients.Client(connectionid).SendAsync("NewClient");
+            await SendToSeveralClientsAsync(group, "NewClient");
+        }
+    }
+    private async Task SendToSeveralClientsAsync(string group, string method)
+    {
+        var list = _hosts.Where(xx => xx.Value == group);
+        foreach (var item in list)
+        {
+            string connectionid = item.Key;
+            await Clients.Client(connectionid).SendAsync(method);
         }
     }
     public async Task ClientInvokeSimpleActionAsync(string group, string method)
@@ -40,8 +48,13 @@ public class RemoteControlHub : Hub
         {
             await Clients.Caller.SendAsync("Failed");
         }
-        string connectionid = _hosts.Single(xx => xx.Value == group).Key;
-        await Clients.Client(connectionid).SendAsync(method);
+        //looks like i need to allow to send to more than one host (because its possible like for 2 music apps that needs sharing, needs to send both).
+
+        await SendToSeveralClientsAsync(group, method);
+
+
+        //string connectionid = _hosts.Single(xx => xx.Value == group).Key;
+
     }
     public async Task ClientInvokeComplexActionAsync(string group, string method, string payLoad) //since serializing does not work for this case.
     {
@@ -49,8 +62,15 @@ public class RemoteControlHub : Hub
         {
             await Clients.Caller.SendAsync("Failed");
         }
-        string connectionid = _hosts.Single(xx => xx.Value == group).Key;
-        await Clients.Client(connectionid).SendAsync(method, payLoad);
+        var list = _hosts.Where(xx => xx.Value == group);
+        foreach (var item in list)
+        {
+            string connectionid = item.Key;
+            await Clients.Client(connectionid).SendAsync(method, payLoad);
+        }
+        //await SendToSeveralClientsAsync(group, method);
+        //string connectionid = _hosts.Single(xx => xx.Value == group).Key;
+        //await Clients.Client(connectionid).SendAsync(method, payLoad);
     }
     public async Task HostSendClientDataAsync(string group, string method, string payLoad)
     {
