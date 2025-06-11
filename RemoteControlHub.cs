@@ -12,6 +12,13 @@ public class RemoteControlHub : Hub
         }
         await base.OnDisconnectedAsync(exception);
     }
+    public async Task HostDisconnectAsync(string group)
+    {
+        if (_hosts.TryRemove(Context.ConnectionId, out _))
+        {
+            await Clients.OthersInGroup(group).SendAsync("HostDisconnected");
+        }
+    }
     private static bool HasHost(string group)
     {
         return _hosts.Any(xx => xx.Value == group);
