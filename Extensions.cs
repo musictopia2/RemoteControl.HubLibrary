@@ -1,33 +1,40 @@
 ﻿namespace RemoteControl.HubLibrary;
 public static class Extensions
 {
-    public static IServiceCollection AddRemoteControlServices(this IServiceCollection services)
+    extension (IServiceCollection services)
     {
-        services.AddSignalR(options =>
+        public IServiceCollection AddRemoteControlServices()
         {
-            options.MaximumReceiveMessageSize = 72428800;
-        }); //don't use core. core is only bare necessities.
-        services.AddCors(options =>
-        {
-            options.AddPolicy("AllowOrigin", builder =>
+            services.AddSignalR(options =>
             {
-                builder.AllowAnyOrigin()
-                .AllowAnyMethod()
-                .AllowAnyHeader();
+                options.MaximumReceiveMessageSize = 72428800;
+            }); //don't use core. core is only bare necessities.
+            services.AddCors(options =>
+            {
+                options.AddPolicy("AllowOrigin", builder =>
+                {
+                    builder.AllowAnyOrigin()
+                    .AllowAnyMethod()
+                    .AllowAnyHeader();
+                });
             });
-        });
-        return services;
+            return services;
+        }
+        
     }
-    public static IApplicationBuilder AddRemoteControlServices(this IApplicationBuilder app)
+    extension (IApplicationBuilder app)
     {
-        app.UseEndpoints(endpoints =>
+        public IApplicationBuilder AddRemoteControlServices()
         {
-            endpoints.MapHub<RemoteControlHub>("/remotecontrolhub", options =>
+            app.UseEndpoints(endpoints =>
             {
-                options.TransportMaxBufferSize = 72428800;
-                options.ApplicationMaxBufferSize = 72428800;
+                endpoints.MapHub<RemoteControlHub>("/remotecontrolhub", options =>
+                {
+                    options.TransportMaxBufferSize = 72428800;
+                    options.ApplicationMaxBufferSize = 72428800;
+                });
             });
-        });
-        return app;
+            return app;
+        }
     }
 }
